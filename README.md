@@ -7,6 +7,7 @@ Secure contact form integration that writes to Supabase `public.bookings` using 
 This project uses:
 - Vite frontend (`index.html`, `src/main.js`, `src/styles.css`)
 - Express API backend (`server.js`) for secure Supabase writes
+- Optional Supabase Edge Function backend (`supabase/functions/contact/index.ts`)
 
 In development:
 - Frontend: `http://localhost:5173`
@@ -57,11 +58,42 @@ Setup:
 Frontend API settings:
 - `VITE_API_BASE_URL` (optional): Absolute backend base URL, for example `https://api.example.com`.
 - `VITE_GARAGE_ID` (optional): Fallback garage id used for analytics when no `/health` endpoint is reachable.
+- `VITE_API_CONTACT_PATH` (optional): Contact endpoint path. For Supabase Functions use `/contact`.
+- `VITE_API_HEALTH_PATH` (optional): Health endpoint path. Leave empty for Supabase Functions.
 
 Notes:
 - Local `npm run dev` works without `VITE_API_BASE_URL` because Vite proxies `/api` and `/health`.
 - Same-origin deployments (frontend and backend on the same host) can work without `VITE_API_BASE_URL`.
 - Static hosting on GitHub Pages (`*.github.io`) requires `VITE_API_BASE_URL`; otherwise contact submit is disabled to avoid 404/405 errors.
+
+### Supabase Functions setup (Supabase-only)
+
+Deploy the included `contact` function:
+
+```bash
+supabase functions deploy contact --project-ref YOUR_PROJECT_REF
+```
+
+Set required function secrets:
+
+```bash
+supabase secrets set \
+	SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co \
+	SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY \
+	GARAGE_UUID=YOUR_GARAGE_UUID \
+	--project-ref YOUR_PROJECT_REF
+```
+
+Set frontend env for GitHub Pages/static frontend:
+
+```bash
+VITE_API_BASE_URL=https://YOUR_PROJECT_REF.functions.supabase.co
+VITE_API_CONTACT_PATH=/contact
+VITE_API_HEALTH_PATH=
+VITE_GARAGE_ID=YOUR_GARAGE_UUID
+```
+
+Then rebuild `docs/` and push.
 
 Per-garage options:
 1. One GA property per garage:

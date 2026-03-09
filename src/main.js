@@ -4,8 +4,15 @@ const app = document.getElementById("app");
 const GA_MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || "").trim();
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/+$/, "");
 const FALLBACK_GARAGE_ID = (import.meta.env.VITE_GARAGE_ID || "").trim();
+const API_CONTACT_PATH_OVERRIDE = (import.meta.env.VITE_API_CONTACT_PATH || "").trim();
+const API_HEALTH_PATH_OVERRIDE = (import.meta.env.VITE_API_HEALTH_PATH || "").trim();
 const IS_LOCALHOST = typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
 const IS_GITHUB_PAGES_HOST = typeof window !== "undefined" && window.location.hostname.endsWith("github.io");
+const IS_SUPABASE_FUNCTIONS_BASE = /\.functions\.supabase\.co$/i.test(
+  API_BASE_URL.replace(/^https?:\/\//i, "")
+);
+const API_CONTACT_PATH = API_CONTACT_PATH_OVERRIDE || (IS_SUPABASE_FUNCTIONS_BASE ? "/contact" : "/api/contact");
+const API_HEALTH_PATH = API_HEALTH_PATH_OVERRIDE || (IS_SUPABASE_FUNCTIONS_BASE ? "" : "/health");
 const hasApiAccess = IS_LOCALHOST || !IS_GITHUB_PAGES_HOST || Boolean(API_BASE_URL);
 let activeGarageId = FALLBACK_GARAGE_ID;
 
@@ -143,12 +150,12 @@ function trackEvent(eventName, eventParams = {}) {
 }
 
 async function fetchGarageId() {
-  if (!hasApiAccess) {
+  if (!hasApiAccess || !API_HEALTH_PATH) {
     return;
   }
 
   try {
-    const response = await fetch(apiUrl("/health"));
+    const response = await fetch(apiUrl(API_HEALTH_PATH));
     if (!response.ok) {
       return;
     }
@@ -250,7 +257,7 @@ form.addEventListener("submit", async (event) => {
   });
 
   try {
-    const response = await fetch(apiUrl("/api/contact"), {
+    const response = await fetch(apiUrl(API_CONTACT_PATH), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -274,7 +281,13 @@ form.addEventListener("submit", async (event) => {
       service: payload.service || "Contact Form"
     });
   } catch (error) {
-    setStatus("error", error.message || "An unexpected error occurred.");
+    const isLikelyCorsError = error instanceof TypeError;
+    setStatus(
+      "error",
+      isLikelyCorsError
+        ? "Unable to reach booking API. Verify function URL and CORS settings."
+        : error.message || "An unexpected error occurred."
+    );
     trackEvent("contact_submit_error", {
       service: payload.service || "Contact Form",
       reason: String(error.message || "unknown").slice(0, 120)
