@@ -5,7 +5,8 @@ const GA_MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || "").trim();
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/+$/, "");
 const FALLBACK_GARAGE_ID = (import.meta.env.VITE_GARAGE_ID || "").trim();
 const IS_LOCALHOST = typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
-const hasApiAccess = IS_LOCALHOST || Boolean(API_BASE_URL);
+const IS_GITHUB_PAGES_HOST = typeof window !== "undefined" && window.location.hostname.endsWith("github.io");
+const hasApiAccess = IS_LOCALHOST || !IS_GITHUB_PAGES_HOST || Boolean(API_BASE_URL);
 let activeGarageId = FALLBACK_GARAGE_ID;
 
 function apiUrl(pathname) {

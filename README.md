@@ -60,7 +60,8 @@ Frontend API settings:
 
 Notes:
 - Local `npm run dev` works without `VITE_API_BASE_URL` because Vite proxies `/api` and `/health`.
-- Static hosting (for example GitHub Pages `docs/`) requires `VITE_API_BASE_URL`; otherwise contact submit is disabled to avoid 404/405 errors.
+- Same-origin deployments (frontend and backend on the same host) can work without `VITE_API_BASE_URL`.
+- Static hosting on GitHub Pages (`*.github.io`) requires `VITE_API_BASE_URL`; otherwise contact submit is disabled to avoid 404/405 errors.
 
 Per-garage options:
 1. One GA property per garage:
