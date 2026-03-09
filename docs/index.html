@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TorqueLine Auto Care</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <script type="module" crossorigin src="./assets/index-B3aAv5Wt.js"></script>
+    <link rel="stylesheet" crossorigin href="./assets/index-Br_cqL1N.css">
+  </head>
+  <body>
+    <div id="app"></div>
+  </body>
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag("js", new Date());
+  gtag("config", "G-XXXXXXXXXX", { send_page_view: true });
+
+  // Call after successful form submit
+  function trackBookingSubmit(serviceType) {
+    gtag("event", "booking_submit", {
+      event_category: "engagement",
+      event_label: serviceType || "unknown-service",
+      value: 1
+    });
+  }
+</script>
+</html>
