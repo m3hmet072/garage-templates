@@ -29,6 +29,8 @@ GARAGE_UUID=YOUR_GARAGE_UUID
 PORT=5173
 API_PORT=8787
 VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
+VITE_API_BASE_URL=
+VITE_GARAGE_ID=
 ```
 
 Important:
@@ -52,6 +54,14 @@ Setup:
 2. Set `VITE_GA_MEASUREMENT_ID` in `.env` for that website/garage.
 3. Rebuild/restart frontend (`npm run dev` for local or `npm run build` for deploy).
 
+Frontend API settings:
+- `VITE_API_BASE_URL` (optional): Absolute backend base URL, for example `https://api.example.com`.
+- `VITE_GARAGE_ID` (optional): Fallback garage id used for analytics when no `/health` endpoint is reachable.
+
+Notes:
+- Local `npm run dev` works without `VITE_API_BASE_URL` because Vite proxies `/api` and `/health`.
+- Static hosting (for example GitHub Pages `docs/`) requires `VITE_API_BASE_URL`; otherwise contact submit is disabled to avoid 404/405 errors.
+
 Per-garage options:
 1. One GA property per garage:
 Set a different `VITE_GA_MEASUREMENT_ID` per deployment.
@@ -66,6 +76,16 @@ npm run dev
 ```
 
 Open `http://localhost:5173`.
+
+## Publish to docs/
+
+Build static assets into `docs/`:
+
+```bash
+npm run build -- --outDir docs --base ./
+```
+
+For GitHub Pages deployments from `docs/`, point `VITE_API_BASE_URL` to your deployed API backend.
 
 ## API endpoint
 

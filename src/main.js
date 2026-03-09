@@ -2,7 +2,15 @@ import "./styles.css";
 
 const app = document.getElementById("app");
 const GA_MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID || "").trim();
-let activeGarageId = "";
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || "").trim().replace(/\/+$/, "");
+const FALLBACK_GARAGE_ID = (import.meta.env.VITE_GARAGE_ID || "").trim();
+const IS_LOCALHOST = typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+const hasApiAccess = IS_LOCALHOST || Boolean(API_BASE_URL);
+let activeGarageId = FALLBACK_GARAGE_ID;
+
+function apiUrl(pathname) {
+  return API_BASE_URL ? `${API_BASE_URL}${pathname}` : pathname;
+}
 
 app.innerHTML = `
   <header class="topbar">
@@ -134,12 +142,20 @@ function trackEvent(eventName, eventParams = {}) {
 }
 
 async function fetchGarageId() {
+  if (!hasApiAccess) {
+    return;
+  }
+
   try {
-    const response = await fetch("/health");
+    const response = await fetch(apiUrl("/health"));
+    if (!response.ok) {
+      return;
+    }
+
     const result = await response.json();
     activeGarageId = typeof result.garage_id === "string" ? result.garage_id : "";
   } catch (_error) {
-    activeGarageId = "";
+    activeGarageId = FALLBACK_GARAGE_ID;
   }
 }
 
@@ -179,13 +195,19 @@ function validatePayload(payload) {
 
 initAnalytics();
 
-fetchGarageId().finally(() => {
+const trackPageView = () => {
   trackEvent("page_view", {
     page_title: document.title,
     page_location: window.location.href,
     page_path: window.location.pathname
   });
-});
+};
+
+if (hasApiAccess) {
+  fetchGarageId().finally(trackPageView);
+} else {
+  trackPageView();
+}
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -211,6 +233,15 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  if (!hasApiAccess) {
+    setStatus("error", "Booking API is not configured for this deployment.");
+    trackEvent("contact_submit_error", {
+      service: payload.service || "Contact Form",
+      reason: "api_not_configured"
+    });
+    return;
+  }
+
   submitBtn.disabled = true;
   setStatus("", "Sending...");
   trackEvent("contact_submit_attempt", {
@@ -218,7 +249,7 @@ form.addEventListener("submit", async (event) => {
   });
 
   try {
-    const response = await fetch("/api/contact", {
+    const response = await fetch(apiUrl("/api/contact"), {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
