@@ -1,5 +1,4 @@
 const express = require("express");
-const fs = require("fs");
 const path = require("path");
 const dotenv = require("dotenv");
 const { createClient } = require("@supabase/supabase-js");
@@ -17,7 +16,17 @@ app.use(express.urlencoded({ extended: false }));
 const RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const RATE_LIMIT_MAX_REQUESTS = 5;
 const rateLimitStore = new Map();
-const envFilePath = path.join(__dirname, ".env");
+
+function sanitizeEnvValue(value) {
+  const normalized = typeof value === "string" ? value.trim() : "";
+
+  if (!normalized) {
+    return "";
+  }
+
+  const placeholderPattern = /^(your_|change_me|replace_me|example|dummy|<)/i;
+  return placeholderPattern.test(normalized) ? "" : normalized;
+}
 
 function getClientIp(req) {
   return req.headers["x-forwarded-for"]?.split(",")[0]?.trim() || req.ip || "unknown";
@@ -84,21 +93,11 @@ function validatePayload(body) {
 }
 
 function getRuntimeConfig() {
-  try {
-    const fileContent = fs.readFileSync(envFilePath, "utf8");
-    const parsed = dotenv.parse(fileContent);
-    return {
-      SUPABASE_URL: parsed.SUPABASE_URL || process.env.SUPABASE_URL,
-      SUPABASE_SERVICE_ROLE_KEY: parsed.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY,
-      GARAGE_UUID: parsed.GARAGE_UUID || process.env.GARAGE_UUID
-    };
-  } catch (_err) {
-    return {
-      SUPABASE_URL: process.env.SUPABASE_URL,
-      SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
-      GARAGE_UUID: process.env.GARAGE_UUID
-    };
-  }
+  return {
+    SUPABASE_URL: sanitizeEnvValue(process.env.SUPABASE_URL),
+    SUPABASE_SERVICE_ROLE_KEY: sanitizeEnvValue(process.env.SUPABASE_SERVICE_ROLE_KEY),
+    GARAGE_UUID: sanitizeEnvValue(process.env.GARAGE_UUID)
+  };
 }
 
 function getSupabaseAdmin(config) {

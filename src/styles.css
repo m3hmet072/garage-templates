@@ -172,6 +172,70 @@ h1 {
   max-width: 720px;
 }
 
+.service-fieldset {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.service-fieldset legend {
+  padding: 0;
+  margin-bottom: 8px;
+  font-weight: 600;
+}
+
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.service-chip {
+  display: block;
+}
+
+.service-chip input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.service-chip span {
+  display: block;
+  border: 1px solid #c5cad5;
+  border-radius: 999px;
+  background: #fff;
+  padding: 9px 12px;
+  text-align: center;
+  font-weight: 600;
+  text-transform: lowercase;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.service-chip input:focus-visible + span {
+  outline: 3px solid rgba(191, 47, 37, 0.22);
+  outline-offset: 2px;
+}
+
+.service-chip input:checked + span {
+  background: #f8dfdc;
+  border-color: var(--accent);
+  color: #5e1813;
+}
+
+.services-help {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.service-other {
+  margin-top: 8px;
+  display: grid;
+  gap: 6px;
+}
+
 input,
 textarea,
 button {
@@ -237,5 +301,15 @@ button:disabled {
   .menu {
     gap: 12px;
     font-size: 0.95rem;
+  }
+
+  .services-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 520px) {
+  .services-grid {
+    grid-template-columns: 1fr;
   }
 }
