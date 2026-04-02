@@ -59,7 +59,17 @@ For GitHub Pages form submissions, configure an external API origin at build tim
 VITE_API_BASE_URL=https://your-api.example.com npm run build:docs
 ```
 
-When `VITE_API_BASE_URL` is not set, GitHub Pages builds will not submit the contact form.
+If you use Supabase Edge Functions, the app automatically posts to `/contact` on that base.
+
+You can also set a full endpoint directly (recommended):
+
+```bash
+VITE_CONTACT_ENDPOINT=https://YOUR_PROJECT_REF.functions.supabase.co/contact npm run build:docs
+```
+
+Your external endpoint must allow CORS from your docs origin (for example `https://m3hmet072.github.io`).
+
+When `VITE_API_BASE_URL` and `VITE_CONTACT_ENDPOINT` are both not set, GitHub Pages builds will not submit the contact form.
 
 ## API endpoint
 

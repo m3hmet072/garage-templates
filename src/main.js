@@ -3,6 +3,7 @@ import "./styles.css";
 const app = document.getElementById("app");
 const SERVICE_OPTIONS = ["apk", "banden", "airco", "occasions", "onderhoud", "other"];
 const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").trim();
+const RAW_CONTACT_ENDPOINT = String(import.meta.env.VITE_CONTACT_ENDPOINT || "").trim();
 
 app.innerHTML = `
   <header class="topbar">
@@ -143,19 +144,24 @@ function getApiBaseUrl() {
   return RAW_API_BASE_URL.replace(/\/+$/, "");
 }
 
-function getApiUrl(pathname) {
-  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+function getContactApiUrl() {
+  const configuredEndpoint = RAW_CONTACT_ENDPOINT.trim();
+  if (configuredEndpoint) {
+    return configuredEndpoint;
+  }
+
   const apiBaseUrl = getApiBaseUrl();
 
   if (apiBaseUrl) {
-    return `${apiBaseUrl}${normalizedPath}`;
+    const contactPath = apiBaseUrl.includes(".functions.supabase.co") ? "/contact" : "/api/contact";
+    return `${apiBaseUrl}${contactPath}`;
   }
 
   if (window.location.hostname.endsWith("github.io")) {
     return null;
   }
 
-  return normalizedPath;
+  return "/api/contact";
 }
 
 function setStatus(type, text) {
@@ -278,7 +284,7 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
-  const contactApiUrl = getApiUrl("/api/contact");
+  const contactApiUrl = getContactApiUrl();
   if (!contactApiUrl) {
     setStatus("error", "Contact API is not configured for this deployment.");
     return;
