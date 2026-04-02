@@ -71,6 +71,33 @@ Your external endpoint must allow CORS from your docs origin (for example `https
 
 When `VITE_API_BASE_URL` and `VITE_CONTACT_ENDPOINT` are both not set, GitHub Pages builds will not submit the contact form.
 
+## Supabase Edge Function (CORS)
+
+This repository includes a CORS-ready edge function at `supabase/functions/contact/index.ts`.
+
+Deploy it and set secrets:
+
+```bash
+supabase functions deploy contact
+supabase secrets set \
+	SUPABASE_URL=https://YOUR_PROJECT_REF.supabase.co \
+	SUPABASE_SERVICE_ROLE_KEY=YOUR_SERVICE_ROLE_KEY \
+	GARAGE_UUID=YOUR_GARAGE_UUID \
+	ALLOWED_ORIGINS=https://m3hmet072.github.io,http://localhost:5173
+```
+
+Then build docs with either:
+
+```bash
+VITE_CONTACT_ENDPOINT=https://YOUR_PROJECT_REF.functions.supabase.co/contact npm run build:docs
+```
+
+or
+
+```bash
+VITE_API_BASE_URL=https://YOUR_PROJECT_REF.functions.supabase.co npm run build:docs
+```
+
 ## API endpoint
 
 `POST /api/contact`
