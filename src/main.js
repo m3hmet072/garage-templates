@@ -2,6 +2,7 @@ import "./styles.css";
 
 const app = document.getElementById("app");
 const SERVICE_OPTIONS = ["apk", "banden", "airco", "occasions", "onderhoud", "other"];
+const RAW_API_BASE_URL = String(import.meta.env.VITE_API_BASE_URL || "").trim();
 
 app.innerHTML = `
   <header class="topbar">
@@ -138,6 +139,25 @@ const otherServiceCheckbox = document.getElementById("service-other");
 const otherServiceWrap = document.getElementById("service-other-wrap");
 const otherServiceInput = document.getElementById("serviceOther");
 
+function getApiBaseUrl() {
+  return RAW_API_BASE_URL.replace(/\/+$/, "");
+}
+
+function getApiUrl(pathname) {
+  const normalizedPath = pathname.startsWith("/") ? pathname : `/${pathname}`;
+  const apiBaseUrl = getApiBaseUrl();
+
+  if (apiBaseUrl) {
+    return `${apiBaseUrl}${normalizedPath}`;
+  }
+
+  if (window.location.hostname.endsWith("github.io")) {
+    return null;
+  }
+
+  return normalizedPath;
+}
+
 function setStatus(type, text) {
   statusEl.textContent = text;
   statusEl.className = type || "";
@@ -258,11 +278,17 @@ form.addEventListener("submit", async (event) => {
     return;
   }
 
+  const contactApiUrl = getApiUrl("/api/contact");
+  if (!contactApiUrl) {
+    setStatus("error", "Contact API is not configured for this deployment.");
+    return;
+  }
+
   submitBtn.disabled = true;
   setStatus("", "Sending...");
 
   try {
-    const response = await fetch("/api/contact", {
+    const response = await fetch(contactApiUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json"

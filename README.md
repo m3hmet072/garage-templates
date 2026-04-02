@@ -53,6 +53,14 @@ npm run build:docs
 
 This writes static assets to `docs/` for repository-hosted docs pages.
 
+For GitHub Pages form submissions, configure an external API origin at build time:
+
+```bash
+VITE_API_BASE_URL=https://your-api.example.com npm run build:docs
+```
+
+When `VITE_API_BASE_URL` is not set, GitHub Pages builds will not submit the contact form.
+
 ## API endpoint
 
 `POST /api/contact`
