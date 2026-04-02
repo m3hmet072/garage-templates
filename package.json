@@ -9,7 +9,7 @@
     "dev:web": "vite",
     "dev:api": "node server.js",
     "build": "vite build",
-    "build:docs": "vite build --outDir docs",
+    "build:docs": "vite build --outDir docs --base=/garage-templates/",
     "preview": "vite preview --port 5173",
     "start": "NODE_ENV=production node server.js"
   },
